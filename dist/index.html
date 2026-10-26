@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<!-- Symmetry Visualizations. All simulation logic is Ada (src/), compiled to
+     WebAssembly and embedded below. This file only draws, shows menus and logs. -->
+<html lang="en"><head><meta charset="utf-8"><title>Symmetry Visualizations</title>
+<style>
+ body{margin:0;background:#000;color:#ddd;font:14px sans-serif;overflow:hidden}
+ #bar{position:fixed;top:0;left:0;right:0;padding:6px;background:#000a;display:flex;gap:8px;align-items:center}
+ #info{opacity:.7} canvas{display:block;width:100vw;height:100vh;image-rendering:pixelated}
+ .panel{position:fixed;top:40px;left:8px;background:#222e;padding:10px;max-height:85vh;overflow:auto;border:1px solid #555}
+ .panel label{display:block;margin:2px 0} .panel input{width:70px;margin-left:6px}
+ #crash{background:#600e}
+</style></head><body>
+<div id="bar">
+ <select id="menu"><option value="-1">Cycle all (demo)</option></select>
+ <button id="setBtn">Settings</button><span id="info"></span>
+ <span style="margin-left:auto;opacity:.5">F9 = feedback file</span>
+</div>
+<div id="setPanel" class="panel" hidden></div>
+<div id="crash" class="panel" hidden>The last session did not end cleanly.
+ <button id="crashDl">Download crash report</button> <button onclick="this.parentNode.hidden=true">Dismiss</button></div>
+<canvas id="view"></canvas>
+<script>
+"use strict";
+const VERSION = "0.1.0", WASM = "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", CYCLE_SECONDS = 15;
+
+// One entry per Ada visualization; parameter order = Params (1 ..) in Ada.
+const VIZ = [
+ {name: "Rule 30", params: [["Rule",0,255,30],["Width",51,1023,401],["Height",50,1000,300],
+   ["Random start (0/1)",0,1,0],["Rows per frame",1,20,1],["Hue",0,359,45]]},
+ {name: "Game of Life", params: [["Width",20,1000,160],["Height",20,1000,100],["Density %",1,99,30],
+   ["Wrap edges (0/1)",0,1,1],["Frames per generation",1,60,4],["Hue",0,359,120]]},
+ {name: "Star Mandala", params: [["Size",200,1000,480],["Star points",3,16,7],
+   ["Colour (0 = white, else hue)",0,359,0],["Triangle size (% of radius)",2,20,6]]},
+];
+
+// ---- event log, kept in localStorage so it survives a crash ----
+const LOG_MAX = 200, store = localStorage;
+let log = JSON.parse(store.getItem("sv.log") || "[]"), errors = [];
+function note(ev, data) {
+  log.push({t: new Date().toISOString(), ev, data});
+  if (log.length > LOG_MAX) log.shift();
+  store.setItem("sv.log", JSON.stringify(log));
+}
+function download(name, obj) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(obj, null, 1)], {type: "application/json"}));
+  a.download = name; a.click();
+  note("download", name);
+}
+function stamp() { return new Date().toISOString().replace(/[:.]/g, "-"); }
+
+// Crash detection: "sv.clean" is set to 1 only when the page closes normally.
+const crashedBefore = store.getItem("sv.clean") === "0";
+const previousLog = log.slice();
+store.setItem("sv.clean", "0");
+note("start", {version: VERSION, crashedBefore});
+let fatal = false;
+addEventListener("pagehide", () => { if (!fatal) { note("clean exit"); store.setItem("sv.clean", "1"); } });
+setInterval(() => store.setItem("sv.heartbeat", Date.now()), 2000);
+onerror = (msg, src, line) => { errors.push(msg + " @" + line); note("error", msg + " @" + line); };
+onunhandledrejection = e => { errors.push(String(e.reason)); note("rejection", String(e.reason)); };
+if (crashedBefore) {
+  crash.hidden = false;
+  crashDl.onclick = () => download("crash-report-" + stamp() + ".json", {version: VERSION,
+    lastHeartbeat: new Date(+store.getItem("sv.heartbeat")).toISOString(),
+    browser: navigator.userAgent, eventsBeforeCrash: previousLog,
+    eventsAfterReload: log.slice(previousLog.length)});
+}
+
+// ---- settings (user values per visualization) ----
+let settings = JSON.parse(store.getItem("sv.settings") || "null") || VIZ.map(v => v.params.map(p => p[3]));
+VIZ.forEach((v, i) => {
+  menu.add(new Option(v.name, i));
+  const f = document.createElement("fieldset");
+  f.innerHTML = "<legend>" + v.name + "</legend>" + v.params.map((p, j) =>
+    `<label>${p[0]}<input type=number min=${p[1]} max=${p[2]} value=${settings[i][j]} data-v=${i} data-p=${j}></label>`).join("");
+  setPanel.append(f);
+});
+setPanel.insertAdjacentHTML("beforeend", "<button id=apply>Apply</button> <button id=reset>Defaults</button>");
+setBtn.onclick = () => setPanel.hidden = !setPanel.hidden;
+apply.onclick = () => {
+  setPanel.querySelectorAll("input").forEach(e => {
+    const p = VIZ[e.dataset.v].params[e.dataset.p];
+    settings[e.dataset.v][e.dataset.p] = Math.min(p[2], Math.max(p[1], Math.round(+e.value) || p[3]));
+  });
+  store.setItem("sv.settings", JSON.stringify(settings));
+  note("settings", settings);
+  if (menu.value >= 0) run(+menu.value, settings[menu.value]);
+};
+reset.onclick = () => { store.removeItem("sv.settings"); location.reload(); };
+
+// ---- the WebAssembly (Ada) side ----
+let ada, current = -1, values = [], fps = 0, frames = 0, cycleTimer;
+const view = document.getElementById("view"), ctx = view.getContext("2d"), off = document.createElement("canvas");
+
+function run(i, vals) {
+  current = i; values = vals;
+  vals.forEach((v, j) => ada.sv_set_param(j + 1, v));
+  ada.sv_start(i, (Math.random() * 2 ** 32) >>> 0);
+  info.textContent = VIZ[i].name + ": " + VIZ[i].params.map((p, j) => p[0] + "=" + vals[j]).join(", ");
+  note("run", {viz: VIZ[i].name, params: vals});
+}
+function randomRun() {
+  const i = (current + 1) % VIZ.length;
+  run(i, VIZ[i].params.map(p => p[1] + Math.floor(Math.random() * (p[2] - p[1] + 1))));
+}
+menu.onchange = () => {
+  clearInterval(cycleTimer);
+  if (menu.value < 0) { randomRun(); cycleTimer = setInterval(randomRun, CYCLE_SECONDS * 1000); }
+  else run(+menu.value, settings[menu.value]);
+};
+
+function frame() {
+  if (fatal) return;
+  try {
+    ada.sv_tick();
+    const w = ada.sv_width(), h = ada.sv_height();
+    off.width = w; off.height = h;
+    off.getContext("2d").putImageData(new ImageData(new Uint8ClampedArray(ada.memory.buffer, ada.sv_frame(), w * h * 4), w, h), 0, 0);
+    view.width = innerWidth; view.height = innerHeight;
+    const s = Math.min(innerWidth / w, innerHeight / h);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(off, (innerWidth - w * s) / 2, (innerHeight - h * s) / 2, w * s, h * s);
+    frames++;
+  } catch (e) {               // a WebAssembly trap (e.g. out of bounds) ends up here
+    fatal = true; errors.push(String(e)); note("wasm trap", String(e));
+    crash.hidden = false; crash.firstChild.textContent = "The visualization crashed: " + e + ". ";
+    crashDl.onclick = () => download("crash-report-" + stamp() + ".json",
+      {version: VERSION, browser: navigator.userAgent, events: log});
+    return;
+  }
+  requestAnimationFrame(frame);
+}
+setInterval(() => { fps = frames; frames = 0; }, 1000);
+
+// ---- F9: one feedback file with everything useful ----
+addEventListener("keydown", e => {
+  if (e.key !== "F9") return;
+  e.preventDefault();
+  download("feedback-" + stamp() + ".json", {version: VERSION, time: new Date().toISOString(),
+    browser: navigator.userAgent, screen: [innerWidth, innerHeight, devicePixelRatio],
+    mode: menu.value < 0 ? "cycle" : "selected", visualization: VIZ[current] && VIZ[current].name,
+    parameters: values, settings, fps, errors, events: log});
+});
+
+WebAssembly.instantiate(Uint8Array.from(atob(WASM), c => c.charCodeAt(0))).then(r => {
+  ada = r.instance.exports;
+  note("wasm loaded");
+  menu.onchange();
+  requestAnimationFrame(frame);
+});
+</script></body></html>
