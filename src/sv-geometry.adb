@@ -27,4 +27,27 @@ package body SV.Geometry is
       return Y;
    end Inv_Sqrt;
 
+   procedure Stroke (A, B : Vec; WA, WB : Float; C : Pixel) is
+      AB : constant Vec := B - A;
+      L2 : constant Float := Len2 (AB) + 1.0E-6;
+      R  : constant Float := Float'Max (WA, WB) / 2.0 + 1.0;   --  bounding box margin
+      P  : Vec;
+      T, H : Float;
+   begin
+      for Y in Integer'Max (0, Integer (Float'Min (A.Y, B.Y) - R)) ..
+               Integer'Min (Height - 1, Integer (Float'Max (A.Y, B.Y) + R))
+      loop
+         for X in Integer'Max (0, Integer (Float'Min (A.X, B.X) - R)) ..
+                  Integer'Min (Width - 1, Integer (Float'Max (A.X, B.X) + R))
+         loop
+            P := Vec'(Float (X) + 0.5, Float (Y) + 0.5) - A;
+            T := Dot (P, AB) / L2;                 --  0 at A, 1 at B
+            H := (WA + T * (WB - WA)) / 2.0;       --  half width there
+            if T in 0.0 .. 1.0 and then Len2 (P - T * AB) <= H * H then
+               Put (X, Y, C);
+            end if;
+         end loop;
+      end loop;
+   end Stroke;
+
 end SV.Geometry;

@@ -14,7 +14,7 @@ Open `dist/index.html` in any modern browser (double-click it). You don't need a
 * **Crash reports:** the last 200 events are kept in the browser's localStorage. If the previous session did not end cleanly (tab crash, hang, WebAssembly trap), a red notice offers `crash-report-*.json`. That file holds the events before the crash and the first events after the reload.
 
 Visualizations: **Rule 30** (any elementary rule 0–255, scrolling), **Conway's Game of Life**,
-**Star Mandala** (rotating star medallion), and **Field 1–5**, five field-line diagrams of point charges: dipole with pulsing equipotentials, four-lobed loops with orbiting charges, two dipoles with flowing dots, a rotating grid globe, and a fan of lines that grows and fades. Spin and flow speeds and charge strengths are randomized on every run.
+**Star Mandala** (rotating star medallion), and **Field 1–5**, five field-line diagrams of point charges: dipole with pulsing equipotentials, four-lobed loops with orbiting charges, two dipoles with flowing dots, a rotating grid globe, and a fan of lines that grows and fades. Also **Growth Tree** (a segmented bar opens into a fan of strips and then a branching tree, folds back, and regrows differently) and **Balance** (squares on a beam that tilts with the real torque until w1·d1 = w2·d2). Spin and flow speeds and charge strengths are randomized on every run.
 
 ## Layout
 
@@ -24,7 +24,9 @@ src/sv-rule_30.ad?        Rule 30 / elementary cellular automaton
 src/sv-life.ad?           Game of Life
 src/sv-mandala.ad?        Star Mandala
 src/sv-fields.ad?         Field 1-5: shared field-line tracer and equipotentials
-src/sv-geometry.ad?       vectors, sin/cos, 1/sqrt in plain Ada (no maths library)
+src/sv-tree.ad?           Growth Tree (one recursive tree, only the opening angle changes)
+src/sv-balance.ad?        Balance (torque, easing)
+src/sv-geometry.ad?       vectors, sin/cos, 1/sqrt, easing, filled strips in plain Ada (no maths library)
 src/sv-api.ad?            the functions the browser calls (sv_start, sv_tick, ...)
 web/template.html         thin JavaScript: drawing, menu, settings, F9, crash log
 build.sh                  compiles Ada -> WebAssembly, embeds it into dist/index.html

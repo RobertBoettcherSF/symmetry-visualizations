@@ -21,5 +21,11 @@ package SV.Geometry is
 
    function Dir (T : Float) return Vec;          --  (cos T, sin T)
    function Inv_Sqrt (X : Float) return Float;   --  1 / sqrt (X), X > 0
+   function Smooth (X : Float) return Float is      --  easing 0 .. 1, slow at both ends
+     (if X <= 0.0 then 0.0 elsif X >= 1.0 then 1.0 else X * X * (3.0 - 2.0 * X));
+
+   --  Fill the strip from A to B (pixel coordinates) whose width changes
+   --  from WA to WB: a rectangle, a tapered branch or (WA = 0) a triangle.
+   procedure Stroke (A, B : Vec; WA, WB : Float; C : Pixel);
 
 end SV.Geometry;
