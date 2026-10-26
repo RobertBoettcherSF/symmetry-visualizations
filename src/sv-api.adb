@@ -4,6 +4,10 @@ with SV.Mandala;
 with SV.Fields;
 with SV.Tree;
 with SV.Balance;
+with SV.Lorenz;
+with SV.Fractals;
+with SV.Evolute;
+with SV.Crystal;
 
 package body SV.API is
 
@@ -29,6 +33,10 @@ package body SV.API is
          when 3 .. 7 => Fields.Start (Viz - 2);
          when 8      => Tree.Start;
          when 9      => Balance.Start;
+         when 10     => Lorenz.Start;
+         when 11 .. 13 => Fractals.Start (Viz - 10);
+         when 14     => Evolute.Start;
+         when 15     => Crystal.Start;
          when others => null;
       end case;
    end Start;
@@ -42,6 +50,10 @@ package body SV.API is
          when 3 .. 7 => Fields.Tick;
          when 8      => Tree.Tick;
          when 9      => Balance.Tick;
+         when 10     => Lorenz.Tick;
+         when 11 .. 13 => Fractals.Tick;
+         when 14     => Evolute.Tick;
+         when 15     => Crystal.Tick;
          when others => null;
       end case;
    end Tick;

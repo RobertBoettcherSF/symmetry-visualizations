@@ -37,7 +37,13 @@ const VIZ = [
  {name: "Field 4: Grid globe", params: [["Size",200,1000,420],["Lines per charge",4,48,16],["Colour (0 = cream, else hue)",0,359,0]]},
  {name: "Field 5: Fan", params: [["Size",200,1000,420],["Lines per charge",4,48,10],["Colour (0 = cream, else hue)",0,359,0]]},
  {name: "Growth Tree", params: [["Size",200,1000,480],["Max depth",3,10,7],["Colour (0 = white, else hue)",0,359,0]]},
- {name: "Balance", params: [["Size",200,1000,600],["Speed",1,10,3],["Colour (0 = white, else hue)",0,359,0]]},
+ {name: "Balance", params: [["Size",200,1000,600],["Speed",1,6,3],["Colour (0 = white, else hue)",0,359,0]]},
+ {name: "Lorenz Attractor", params: [["Size",200,1000,600],["Steps per frame",1,20,4],["Trail length",500,8000,4000],["Colour (0 = white, else hue)",0,359,0],["Rho",10,60,28]]},
+ {name: "Sierpinski Triangle", params: [["Size",200,1000,600],["Max depth",1,6,5],["Speed",1,6,3],["Colour (0 = white, else hue)",0,359,0]]},
+ {name: "Koch Snowflake", params: [["Size",200,1000,600],["Max depth",1,5,4],["Speed",1,6,3],["Colour (0 = white, else hue)",0,359,0]]},
+ {name: "Sierpinski Hexagon", params: [["Size",200,1000,600],["Max depth",1,5,4],["Speed",1,6,3],["Colour (0 = white, else hue)",0,359,0]]},
+ {name: "Evolute Spiral", params: [["Size",200,1000,600],["Turns (tenths)",15,40,25],["Speed",1,6,3],["Colour (0 = white, else hue)",0,359,0]]},
+ {name: "Crystal Diffraction", params: [["Size",200,1000,600],["Node rings",2,8,5],["Colour (0 = white, else hue)",0,359,0]]},
 ];
 
 // ---- event log, kept in localStorage so it survives a crash ----
@@ -144,23 +150,19 @@ function frame() {
 }
 setInterval(() => { fps = frames; frames = 0; }, 1000);
 
-// ---- F9: one feedback file with everything useful ----
-// ---- Space: next visualization (random in cycle mode, user settings otherwise) ----
+// ---- keys: Space = next visualization, F9 = feedback file ----
 addEventListener("keydown", e => {
-  if (e.key !== " " || e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
-  e.preventDefault();
-  note("space");
-  if (menu.value < 0) menu.onchange();       // next random one, cycle timer restarts
-  else { menu.value = (current + 1) % VIZ.length; menu.onchange(); }
-});
-
-addEventListener("keydown", e => {
-  if (e.key !== "F9") return;
-  e.preventDefault();
-  download("feedback-" + stamp() + ".json", {version: VERSION, time: new Date().toISOString(),
-    browser: navigator.userAgent, screen: [innerWidth, innerHeight, devicePixelRatio],
-    mode: menu.value < 0 ? "cycle" : "selected", visualization: VIZ[current] && VIZ[current].name,
-    parameters: values, settings, fps, errors, events: log});
+  if (e.key === " " && !["INPUT", "SELECT"].includes(e.target.tagName)) {
+    e.preventDefault(); note("space");
+    if (menu.value >= 0) menu.value = (current + 1) % VIZ.length;   // cycle mode: next random one
+    menu.onchange();
+  } else if (e.key === "F9") {
+    e.preventDefault();
+    download("feedback-" + stamp() + ".json", {version: VERSION, time: new Date().toISOString(),
+      browser: navigator.userAgent, screen: [innerWidth, innerHeight, devicePixelRatio],
+      mode: menu.value < 0 ? "cycle" : "selected", visualization: VIZ[current] && VIZ[current].name,
+      parameters: values, settings, fps, errors, events: log});
+  }
 });
 
 WebAssembly.instantiate(Uint8Array.from(atob(WASM), c => c.charCodeAt(0))).then(r => {

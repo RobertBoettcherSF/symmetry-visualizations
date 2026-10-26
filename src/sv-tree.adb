@@ -28,9 +28,8 @@ package body SV.Tree is
 
    procedure Start is
    begin
-      Width  := Integer'Min (Params (1), Max_H);
-      Height := Width;
-      Ink    := (if Params (3) = 0 then 16#FFF0_F0F0# else Hue_Color (Params (3)));
+      Square (Params (1));
+      Ink    := SV.Ink (Params (3));
       Phase  := 0.0;
       Randomize;
    end Start;

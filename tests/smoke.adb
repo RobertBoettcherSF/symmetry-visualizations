@@ -37,7 +37,10 @@ begin
    Put_Line ("Mandala lit cells:" & Lit'Image);
 
    Params := (300, 7, 0, 0, 0, 0, 0, 0);
-   for Viz in 3 .. 9 loop
+   for Viz in 3 .. 15 loop
+      if Viz = 10 then
+         Params := (300, 4, 3, 0, 28, 0, 0, 0);   --  newer ones: size, n, speed, colour, rho
+      end if;
       SV.API.Start (Viz, 7);
       for I in 1 .. 300 loop
          SV.API.Tick;

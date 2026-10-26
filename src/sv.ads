@@ -26,4 +26,11 @@ package SV is
 
    function Hue_Color (Hue : Natural) return Pixel;     --  hue in degrees
 
+   --  The colour setting: 0 gives Plain (near white), else that hue
+   function Ink (Hue : Natural; Plain : Pixel := 16#FFF0_F0F0#) return Pixel is
+     (if Hue = 0 then Plain else Hue_Color (Hue));
+
+   --  A square picture of Size pixels (at most Max_H)
+   procedure Square (Size : Natural);
+
 end SV;

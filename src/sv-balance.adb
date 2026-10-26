@@ -2,75 +2,79 @@ with SV.Geometry; use SV.Geometry;
 
 package body SV.Balance is
 
-   S1, S2         : Float := 0.0;   --  sides of the squares (pixels)
-   W1, W2         : Float := 0.0;   --  weights = areas
-   Pivot, Half    : Float := 0.0;   --  pivot offset from centre, half beam length
-   D1, D2         : Float := 0.0;   --  distances of the squares from the pivot
-   From1, To1     : Float := 0.0;
-   From2, To2     : Float := 0.0;
-   Tilt, Time     : Float := 0.0;
-   Ink            : Pixel := 0;
+   --  Square 1 sits left of the pivot, square 2 right.  Sizes and pivot
+   --  are chosen once per run.
+   type Pair is array (1 .. 2) of Float;
+   S, W, D : Pair := (0.0, 0.0);  --  side, weight (= area), distance from pivot
+   Room    : Pair := (0.0, 0.0);  --  furthest distance on that arm
+   Pivot, Half  : Float := 0.0;   --  pivot offset from centre, half beam length
+   Leader       : Positive := 1;  --  the square that moves first; the other chases
+   From, Target : Float := 0.0;   --  the leader slides From -> Target
+   Time, Tilt   : Float := 0.0;
+   Ink          : Pixel := 0;
 
-   function Fraction return Float is (0.3 + Float (Random (65)) / 100.0);
+   function Other (I : Positive) return Positive is (3 - I);
 
-   --  Distances for equilibrium, with D1 near Want and both on the beam
-   procedure Balanced (Want : Float; A, B : out Float) is
-      Max1 : constant Float := Half + Pivot - S1 / 2.0;   --  room on the left arm
-      Max2 : constant Float := Half - Pivot - S2 / 2.0;   --  and on the right
+   --  Where the follower must be for equilibrium: W1 * D1 = W2 * D2
+   function Balance_Spot (F : Positive) return Float is
+     (W (Other (F)) * D (Other (F)) / W (F));
+
+   --  A new disturbance: the other square leads now and slides to a spot far
+   --  from where it is.  Its range is limited so the follower can still reach
+   --  the balancing spot on its arm.
+   procedure Disturb is
+      F       : Positive;
+      Hi, Mid : Float;
    begin
-      A := Want * Max1;
-      B := W1 * A / W2;
-      if B > Max2 then
-         B := Max2;
-         A := W2 * B / W1;
-      end if;
-   end Balanced;
+      Leader := Other (Leader);
+      F      := Other (Leader);
+      Hi     := Float'Min (Room (Leader), W (F) * Room (F) / W (Leader));
+      Mid    := 0.55 * Hi;
+      From   := D (Leader);
+      Target := (if From > Mid then Hi * Float (10 + Random (35)) / 100.0
+                 else Hi * Float (70 + Random (31)) / 100.0);
+      Time   := 0.0;
+   end Disturb;
 
-   --  A new round starts where the last one ended: square 1 slides to a new
-   --  spot, square 2 then slides to the spot that balances it again.
-   procedure New_Round is
-   begin
-      From1 := D1;
-      From2 := D2;
-      Balanced (Fraction, To1, To2);
-      Time  := 0.0;
-   end New_Round;
-
-   --  Sizes and pivot are chosen once per run
    procedure Start is
       Size : constant Float := Float (Integer'Min (Params (1), Max_H));
    begin
       Width  := Integer (Size);
       Height := Width * 2 / 3;
-      Ink    := (if Params (3) = 0 then 16#FFF0_F0F0# else Hue_Color (Params (3)));
-      S1     := Size * Float (5 + Random (12)) / 100.0;
-      S2     := Size * Float (5 + Random (12)) / 100.0;
-      W1     := S1 * S1;
-      W2     := S2 * S2;
+      Ink    := SV.Ink (Params (3));
+      S (1)  := Size * Float (6 + Random (10)) / 100.0;
+      S (2)  := Size * Float (6 + Random (10)) / 100.0;
+      W      := (S (1) * S (1), S (2) * S (2));
       Half   := Size * 0.42;
-      Pivot  := Size * Float (Random (31) - 15) / 100.0;
-      Balanced (Fraction, D1, D2);
+      Pivot  := Size * Float (Random (21) - 10) / 100.0;
+      Room   := (Half + Pivot - S (1) / 2.0, Half - Pivot - S (2) / 2.0);
+      D (2)  := 0.5 * Float'Min (Room (2), W (1) * Room (1) / W (2));
+      D (1)  := 0.4 * Balance_Spot (1);   --  start out of balance: the beam tips at once
       Tilt   := 0.0;
-      New_Round;
+      Leader := 2;
+      Disturb;
    end Start;
 
    procedure Tick is
       Size   : constant Float := Float (Width);
-      Torque : Float;
+      Speed  : constant Float := Float (Params (2));
       Apex   : constant Vec := (Size / 2.0 + Pivot, Float (Height) * 0.75);
+      F      : constant Positive := Other (Leader);
+      Torque : Float;
       U, N, Base : Vec;
    begin
-      --  one round: square 1 slides, square 2 follows, a pause, new round
-      Time := Time + Float (Params (2)) / 450.0;
-      D1 := From1 + (To1 - From1) * Smooth (Time);
-      D2 := From2 + (To2 - From2) * Smooth (Time - 1.2);
-      if Time > 2.8 then
-         New_Round;
+      --  the leader eases to its target, the follower keeps chasing the
+      --  balancing spot; the next disturbance starts before it gets there
+      Time := Time + Speed / 200.0;
+      D (Leader) := From + (Target - From) * Smooth (Time);
+      D (F) := D (F) + 0.012 * Speed * (Balance_Spot (F) - D (F));
+      if Time >= 1.6 then
+         Disturb;
       end if;
 
       --  the beam turns towards the side with more torque (weight x distance)
-      Torque := W2 * D2 - W1 * D1;
-      Tilt := Tilt + 0.03 * (0.3 * Torque / (W1 * D1 + W2 * D2) - Tilt);
+      Torque := W (2) * D (2) - W (1) * D (1);
+      Tilt := Tilt + 0.05 * (0.6 * Torque / (W (1) * D (1) + W (2) * D (2)) - Tilt);
 
       Clear;
       U := Dir (Tilt);                  --  along the beam
@@ -80,8 +84,8 @@ package body SV.Balance is
       Stroke (Base - (Half + Pivot) * U, Base + (Half - Pivot) * U,
               Size * 0.012, Size * 0.012, Ink);                                --  beam
       Base := Apex + (Size * 0.012) * N;
-      Stroke (Base - D1 * U, Base - D1 * U + S1 * N, S1, S1, Ink);              --  squares
-      Stroke (Base + D2 * U, Base + D2 * U + S2 * N, S2, S2, Ink);
+      Stroke (Base - D (1) * U, Base - D (1) * U + S (1) * N, S (1), S (1), Ink);  --  squares
+      Stroke (Base + D (2) * U, Base + D (2) * U + S (2) * N, S (2), S (2), Ink);
    end Tick;
 
 end SV.Balance;

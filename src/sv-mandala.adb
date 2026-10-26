@@ -20,7 +20,7 @@ package body SV.Mandala is
       Width  := Size;
       Height := Size;
       Points := Integer'Max (3, Integer'Min (Params (2), Max_Points));
-      Ink    := (if Params (3) = 0 then 16#FFFF_FFFF# else Hue_Color (Params (3)));
+      Ink    := SV.Ink (Params (3), 16#FFFF_FFFF#);
       for K in 0 .. Points - 1 loop
          Arm (K)  := Dir (2.0 * Pi * Float (K) / Float (Points) - Pi / 2.0);
          Side (K) := (-Arm (K).Y, Arm (K).X);

@@ -28,6 +28,12 @@ package body SV is
       return Natural (State mod Unsigned_32 (Below));
    end Random;
 
+   procedure Square (Size : Natural) is
+   begin
+      Width  := Natural'Min (Size, Max_H);
+      Height := Width;
+   end Square;
+
    function Hue_Color (Hue : Natural) return Pixel is
       F    : constant Unsigned_32 := Unsigned_32 (Hue mod 60) * 255 / 60;
       R, G, B : Unsigned_32;

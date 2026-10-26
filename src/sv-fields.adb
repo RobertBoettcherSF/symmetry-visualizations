@@ -143,11 +143,10 @@ package body SV.Fields is
       Sign : constant Float := (if Random (2) = 0 then 1.0 else -1.0);
    begin
       Kind   := Variant;
-      Width  := Integer'Min (Params (1), Max_H);
-      Height := Width;
+      Square (Params (1));
       Scale  := Float (Width) / 2.3;
       Lines  := Integer'Max (2, Params (2));
-      Ink    := (if Params (3) = 0 then 16#FFC8_E6F0# else Hue_Color (Params (3)));
+      Ink    := SV.Ink (Params (3), 16#FFC8_E6F0#);
       Max_Steps := 4 * Width;
       T      := 0.0;
       Rx     := 1.05;

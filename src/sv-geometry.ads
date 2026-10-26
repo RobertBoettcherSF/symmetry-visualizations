@@ -28,4 +28,16 @@ package SV.Geometry is
    --  from WA to WB: a rectangle, a tapered branch or (WA = 0) a triangle.
    procedure Stroke (A, B : Vec; WA, WB : Float; C : Pixel);
 
+   --  A thin line from A to B; with Gap > 1 only every Gap-th pixel (dotted)
+   procedure Line (A, B : Vec; C : Pixel; Gap : Positive := 1);
+
+   --  A circle outline; with Gap > 1 dotted
+   procedure Circle (Centre : Vec; R : Float; C : Pixel; Gap : Positive := 1);
+
+   --  Colour C at brightness B (0 .. 1)
+   function Dim (C : Pixel; B : Float) return Pixel;
+
+   --  Fill the inside of a closed polygon (even-odd rule, pixel coordinates)
+   procedure Fill (Corners : Vec_Array; C : Pixel);
+
 end SV.Geometry;

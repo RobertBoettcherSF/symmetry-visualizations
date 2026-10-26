@@ -15,7 +15,24 @@ Open `dist/index.html` in any modern browser (double-click it). You don't need a
 * **Crash reports:** the last 200 events are kept in the browser's localStorage. If the previous session did not end cleanly (tab crash, hang, WebAssembly trap), a red notice offers `crash-report-*.json`. That file holds the events before the crash and the first events after the reload.
 
 Visualizations: **Rule 30** (any elementary rule 0–255, scrolling), **Conway's Game of Life**,
-**Star Mandala** (rotating star medallion), and **Field 1–5**, five field-line diagrams of point charges: dipole with pulsing equipotentials, four-lobed loops with orbiting charges, two dipoles with flowing dots, a rotating grid globe, and a fan of lines that grows and fades. Also **Growth Tree** (a segmented bar opens into a fan of strips and then a branching tree, folds back, and regrows differently) and **Balance** (squares on a beam that tilts with the real torque until w1·d1 = w2·d2). Spin and flow speeds and charge strengths are randomized on every run.
+**Star Mandala** (rotating star medallion), and **Field 1–5**, five field-line diagrams of point charges: dipole with pulsing equipotentials, four-lobed loops with orbiting charges, two dipoles with flowing dots, a rotating grid globe, and a fan of lines that grows and fades. Also **Growth Tree** (a segmented bar opens into a fan of strips and then a branching tree, folds back, and regrows differently) and **Balance** (squares on a beam that tilts with the real torque until w1·d1 = w2·d2). New: **Lorenz Attractor** (RK4, glowing head with fading dotted trail, slowly turning 3D view), **Sierpinski Triangle**, **Koch Snowflake** and **Sierpinski Hexagon** (built level by level with holes and bumps growing in, then folding back), **Evolute Spiral** (a spiral that draws out and unwinds, with counter-rotating dotted radials and chords) and **Crystal Diffraction** (breathing circles, a turning node network and pulses on loops through the centre). Spin and flow speeds and charge strengths are randomized on every run.
+
+## Learn from it
+
+The project is meant to help Ada students program beautiful things. Each package is a small,
+self-contained example with a header comment saying what the maths is. A good reading order:
+
+1. `sv.ads/adb` - a frame of pixels, parameters, a tiny random generator, colours
+2. `sv-rule_30` - one row of bits, a lookup in the rule number
+3. `sv-life` - a 2D grid and neighbour counting
+4. `sv-geometry` - vectors, sin/cos and 1/sqrt from series, lines, circles, polygon fill
+5. `sv-evolute` - a spiral in polar coordinates, r as a function of the angle
+6. `sv-lorenz` - a differential equation solved with Runge-Kutta, a ring buffer, 3D to 2D
+7. `sv-fractals` - recursion: point-in-fractal tests and a recursive polygon (Koch)
+8. `sv-tree` - a recursive tree whose opening angle is animated
+9. `sv-mandala`, `sv-crystal` - building pictures from symmetry (rotations of one piece)
+10. `sv-balance` - physics: torque, easing, a follower chasing equilibrium
+11. `sv-fields` - electric field lines and equipotentials traced through a potential
 
 ## Layout
 
@@ -27,12 +44,17 @@ src/sv-mandala.ad?        Star Mandala
 src/sv-fields.ad?         Field 1-5: shared field-line tracer and equipotentials
 src/sv-tree.ad?           Growth Tree (one recursive tree, only the opening angle changes)
 src/sv-balance.ad?        Balance (torque, easing)
+src/sv-lorenz.ad?         Lorenz Attractor (RK4)
+src/sv-fractals.ad?       Sierpinski Triangle, Koch Snowflake, Sierpinski Hexagon
+src/sv-evolute.ad?        Evolute Spiral
+src/sv-crystal.ad?        Crystal Diffraction
 src/sv-geometry.ad?       vectors, sin/cos, 1/sqrt, easing, filled strips in plain Ada (no maths library)
 src/sv-api.ad?            the functions the browser calls (sv_start, sv_tick, ...)
 web/template.html         thin JavaScript: drawing, menu, settings, F9, crash log
 build.sh                  compiles Ada -> WebAssembly, embeds it into dist/index.html
 tools/get-toolchain.sh    downloads the Ada -> WebAssembly compiler into ./toolchain
-tests/smoke.adb, .gpr     tiny native check (normal GNAT)
+tests/smoke.adb, .gpr     tiny native check (normal GNAT); balance_stress.adb checks Balance never stalls
+tests/browser/            headless browser checks (browser-check.js runs all 16 and takes the screenshots)
 dist/index.html           the result
 ```
 
