@@ -85,7 +85,10 @@ VIZ.forEach((v, i) => {
   setPanel.append(f);
 });
 setPanel.insertAdjacentHTML("beforeend", "<button id=apply>Apply</button> <button id=reset>Defaults</button>");
-setBtn.onclick = () => setPanel.hidden = !setPanel.hidden;
+setBtn.onclick = () => {   // show only the settings of what is playing now
+  setPanel.querySelectorAll("fieldset").forEach((f, i) => f.hidden = i !== current);
+  setPanel.hidden = !setPanel.hidden;
+};
 apply.onclick = () => {
   setPanel.querySelectorAll("input").forEach(e => {
     const p = VIZ[e.dataset.v].params[e.dataset.p];
@@ -93,7 +96,7 @@ apply.onclick = () => {
   });
   store.setItem("sv.settings", JSON.stringify(settings));
   note("settings", settings);
-  if (menu.value >= 0) run(+menu.value, settings[menu.value]);
+  menu.value = current; menu.onchange();   // run it with these values
 };
 reset.onclick = () => { store.removeItem("sv.settings"); location.reload(); };
 

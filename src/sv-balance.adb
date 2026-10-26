@@ -61,7 +61,7 @@ package body SV.Balance is
       U, N, Base : Vec;
    begin
       --  one round: square 1 slides, square 2 follows, a pause, new round
-      Time := Time + Float (Params (2)) / 600.0;
+      Time := Time + Float (Params (2)) / 450.0;
       D1 := From1 + (To1 - From1) * Smooth (Time);
       D2 := From2 + (To2 - From2) * Smooth (Time - 1.2);
       if Time > 2.8 then
