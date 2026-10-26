@@ -3,6 +3,7 @@ package body SV.Rule_30 is
    type Row is array (0 .. Max_W - 1) of Boolean;
    Cells, Next : Row;
    Rows_Done   : Natural := 0;   --  rows drawn so far (until the screen is full)
+   Frame_Count : Natural := 0;   --  frames since the last new row
 
    procedure Draw_Row (Y : Natural) is
       On : constant Pixel := Hue_Color (Params (6));
@@ -53,9 +54,11 @@ package body SV.Rule_30 is
 
    procedure Tick is
    begin
-      for N in 1 .. Params (5) loop
+      Frame_Count := Frame_Count + 1;
+      if Frame_Count >= Params (5) then
+         Frame_Count := 0;
          Step;
-      end loop;
+      end if;
    end Tick;
 
 end SV.Rule_30;
