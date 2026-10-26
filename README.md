@@ -10,6 +10,7 @@ Open `dist/index.html` in any modern browser (double-click it). You don't need a
 * On start it **cycles** through all visualizations with random parameters (15 s each).
 * The **menu** (top left) selects one visualization, which then runs until you change it.
 * **Settings** lets you set every parameter of every visualization. Click *Apply*; values are remembered.
+* **Space** jumps to the next visualization. In cycle mode it gets random parameters and the 15 s timer restarts. Otherwise the menu moves on and the next one runs with your settings.
 * **F9** downloads a feedback file (`feedback-*.json`). It contains the version, browser, the current visualization and parameters, settings, fps, errors and the recent event log.
 * **Crash reports:** the last 200 events are kept in the browser's localStorage. If the previous session did not end cleanly (tab crash, hang, WebAssembly trap), a red notice offers `crash-report-*.json`. That file holds the events before the crash and the first events after the reload.
 

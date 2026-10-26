@@ -13,7 +13,7 @@
 <div id="bar">
  <select id="menu"><option value="-1">Cycle all (demo)</option></select>
  <button id="setBtn">Settings</button><span id="info"></span>
- <span style="margin-left:auto;opacity:.5">F9 = feedback file</span>
+ <span style="margin-left:auto;opacity:.5">Space = next &nbsp; F9 = feedback file</span>
 </div>
 <div id="setPanel" class="panel" hidden></div>
 <div id="crash" class="panel" hidden>The last session did not end cleanly.
@@ -142,6 +142,15 @@ function frame() {
 setInterval(() => { fps = frames; frames = 0; }, 1000);
 
 // ---- F9: one feedback file with everything useful ----
+// ---- Space: next visualization (random in cycle mode, user settings otherwise) ----
+addEventListener("keydown", e => {
+  if (e.key !== " " || e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+  e.preventDefault();
+  note("space");
+  if (menu.value < 0) menu.onchange();       // next random one, cycle timer restarts
+  else { menu.value = (current + 1) % VIZ.length; menu.onchange(); }
+});
+
 addEventListener("keydown", e => {
   if (e.key !== "F9") return;
   e.preventDefault();

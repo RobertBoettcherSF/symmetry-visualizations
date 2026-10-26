@@ -26,27 +26,30 @@ package body SV.Balance is
       end if;
    end Balanced;
 
+   --  A new round starts where the last one ended: square 1 slides to a new
+   --  spot, square 2 then slides to the spot that balances it again.
    procedure New_Round is
-      Size : constant Float := Float (Width);
    begin
-      S1    := Size * Float (5 + Random (12)) / 100.0;
-      S2    := Size * Float (5 + Random (12)) / 100.0;
-      W1    := S1 * S1;
-      W2    := S2 * S2;
-      Half  := Size * 0.42;
-      Pivot := Size * Float (Random (31) - 15) / 100.0;
-      Balanced (Fraction, D1, D2);
       From1 := D1;
       From2 := D2;
       Balanced (Fraction, To1, To2);
       Time  := 0.0;
    end New_Round;
 
+   --  Sizes and pivot are chosen once per run
    procedure Start is
+      Size : constant Float := Float (Integer'Min (Params (1), Max_H));
    begin
-      Width  := Integer'Min (Params (1), Max_H);
+      Width  := Integer (Size);
       Height := Width * 2 / 3;
       Ink    := (if Params (3) = 0 then 16#FFF0_F0F0# else Hue_Color (Params (3)));
+      S1     := Size * Float (5 + Random (12)) / 100.0;
+      S2     := Size * Float (5 + Random (12)) / 100.0;
+      W1     := S1 * S1;
+      W2     := S2 * S2;
+      Half   := Size * 0.42;
+      Pivot  := Size * Float (Random (31) - 15) / 100.0;
+      Balanced (Fraction, D1, D2);
       Tilt   := 0.0;
       New_Round;
    end Start;
@@ -58,7 +61,7 @@ package body SV.Balance is
       U, N, Base : Vec;
    begin
       --  one round: square 1 slides, square 2 follows, a pause, new round
-      Time := Time + Float (Params (2)) / 200.0;
+      Time := Time + Float (Params (2)) / 600.0;
       D1 := From1 + (To1 - From1) * Smooth (Time);
       D2 := From2 + (To2 - From2) * Smooth (Time - 1.2);
       if Time > 2.8 then
@@ -67,7 +70,7 @@ package body SV.Balance is
 
       --  the beam turns towards the side with more torque (weight x distance)
       Torque := W2 * D2 - W1 * D1;
-      Tilt := Tilt + 0.06 * (0.3 * Torque / (W1 * D1 + W2 * D2) - Tilt);
+      Tilt := Tilt + 0.03 * (0.3 * Torque / (W1 * D1 + W2 * D2) - Tilt);
 
       Clear;
       U := Dir (Tilt);                  --  along the beam
