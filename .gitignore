@@ -1,2 +1,8 @@
 toolchain/
 obj/
+node_modules/
+*.o
+*.ali
+*.wasm
+feedback-*.json
+crash-report-*.json

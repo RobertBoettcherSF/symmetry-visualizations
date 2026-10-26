@@ -3,7 +3,7 @@ const {chromium} = require('playwright-core');
   const b = await chromium.launch({executablePath: '/usr/bin/google-chrome', headless: true});
   const p = await (await b.newContext({viewport: {width: 900, height: 650}})).newPage(); const errs = [];
   p.on('pageerror', e => errs.push(e.message));
-  await p.goto('file:///workspace/symmetry-visualizations/dist/index.html'); await p.waitForTimeout(500);
+  await p.goto('file://' + require('path').resolve(__dirname, '../../dist/index.html')); await p.waitForTimeout(500);
   for (let i = 0; i < 2; i++) await p.keyboard.press('Space');
   await p.click('#setBtn');
   console.log('playing:', (await p.textContent('#info')).split(':')[0], '| visible legends:', await p.$$eval('#setPanel fieldset:not([hidden]) legend', l => l.map(x => x.textContent)));

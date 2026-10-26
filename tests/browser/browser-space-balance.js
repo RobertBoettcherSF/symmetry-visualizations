@@ -3,7 +3,7 @@ const {chromium} = require('playwright-core');
   const b = await chromium.launch({executablePath: '/usr/bin/google-chrome', headless: true});
   const p = await (await b.newContext({viewport: {width: 900, height: 650}})).newPage(); const errs = [];
   p.on('pageerror', e => errs.push(e.message));
-  await p.goto('file:///workspace/symmetry-visualizations/dist/index.html'); await p.waitForTimeout(500);
+  await p.goto('file://' + require('path').resolve(__dirname, '../../dist/index.html')); await p.waitForTimeout(500);
   const names = [await p.textContent('#info')];
   for (let i = 0; i < 3; i++) { await p.keyboard.press('Space'); await p.waitForTimeout(200); names.push((await p.textContent('#info')).split(':')[0]); }
   console.log('cycle mode:', names.map(n => n.split(':')[0]).join(' -> '));
@@ -21,7 +21,7 @@ const {chromium} = require('playwright-core');
       prev = d; out.push(n);
     } return out; });
   console.log('changed px per 0.2s: max', Math.max(...diffs), 'median', diffs.slice().sort((a,b)=>a-b)[55]);
-  await p.screenshot({path: '/workspace/symmetry-visualizations/screenshots/balance.png'});
+  await p.screenshot({path: require('path').resolve(__dirname, '../../screenshots/balance.png')});
   console.log('fps', await p.evaluate(() => fps), 'trap', await p.evaluate(() => fatal), 'errors', errs);
   await b.close();
 })();

@@ -1,5 +1,5 @@
 const {chromium} = require('playwright-core');
-const R = '/workspace/symmetry-visualizations', URL = 'file://' + R + '/dist/index.html';
+const R = require('path').resolve(__dirname, '../..'), URL = 'file://' + R + '/dist/index.html';
 (async () => {
   const b = await chromium.launch({executablePath: '/usr/bin/google-chrome', headless: true});
   const p = await (await b.newContext({viewport: {width: 900, height: 650}})).newPage(); const errs = [];

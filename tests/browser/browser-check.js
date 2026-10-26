@@ -2,7 +2,7 @@
 // keeps its frame rate; Balance moves in every half second; F9 and crash log work.
 // Run: node tests/browser-check.js   (needs playwright-core and Chrome)
 const {chromium} = require('playwright-core');
-const R = __dirname + '/../..', URL = 'file://' + R + '/dist/index.html';
+const R = require('path').resolve(__dirname, '../..'), URL = 'file://' + R + '/dist/index.html';
 const shots = ['rule30','game-of-life','star-mandala','field-1','field-2','field-3','field-4','field-5',
   'tree','balance','lorenz','sierpinski-triangle','koch','sierpinski-hexagon','evolute','crystal'];
 // pixels that changed since the last call (sampled in the page, every 4th pixel)
