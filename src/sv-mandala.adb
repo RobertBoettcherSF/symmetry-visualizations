@@ -1,35 +1,9 @@
+with SV.Geometry; use SV.Geometry;
+
 package body SV.Mandala is
-
-   Pi : constant := 3.14159_26535_89793;
-
-   type Vec is record
-      X, Y : Float;
-   end record;
-
-   function "-" (A, B : Vec) return Vec is ((A.X - B.X, A.Y - B.Y));
-   function "*" (S : Float; A : Vec) return Vec is ((S * A.X, S * A.Y));
-   function Dot (A, B : Vec) return Float is (A.X * B.X + A.Y * B.Y);
-   function Len2 (A : Vec) return Float is (Dot (A, A));
-   function Floor (F : Float) return Float is
-     (Float (Integer (F)) - (if Float (Integer (F)) > F then 1.0 else 0.0));
-   function Frac (F : Float) return Float is (F - Floor (F));
-
-   --  Unit vector at angle T (cos T, sin T), by Taylor series: no maths library needed
-   function Dir (T : Float) return Vec is
-      A    : constant Float := T - 2.0 * Pi * Floor ((T + Pi) / (2.0 * Pi));
-      Term : Float := 1.0;
-      C, S : Float := 0.0;
-   begin
-      for N in 0 .. 17 loop
-         if N mod 2 = 0 then C := C + Term; else S := S + Term; end if;
-         Term := (if N mod 2 = 1 then -Term else Term) * A / Float (N + 1);
-      end loop;
-      return (C, S);
-   end Dir;
 
    Max_Points : constant := 16;
    Dots       : constant := 8;     --  small dots inside each rosette
-   type Vec_Array is array (Natural range <>) of Vec;
 
    Points            : Natural := 7;
    Arm, Side, Mid    : Vec_Array (0 .. Max_Points - 1);  --  arm axis, its normal, between arms

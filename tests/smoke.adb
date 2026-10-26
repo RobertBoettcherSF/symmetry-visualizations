@@ -35,4 +35,13 @@ begin
    SV.API.Start (2, 1);
    SV.API.Tick;
    Put_Line ("Mandala lit cells:" & Lit'Image);
+
+   Params := (300, 12, 0, 0, 0, 0, 0, 0);
+   for Viz in 3 .. 7 loop
+      SV.API.Start (Viz, 7);
+      for I in 1 .. 300 loop
+         SV.API.Tick;
+      end loop;
+      Put_Line ("Field" & Integer'Image (Viz - 2) & " lit cells:" & Lit'Image);
+   end loop;
 end Smoke;

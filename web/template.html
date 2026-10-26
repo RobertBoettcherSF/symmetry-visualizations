@@ -31,6 +31,11 @@ const VIZ = [
    ["Wrap edges (0/1)",0,1,1],["Frames per generation",1,60,4],["Hue",0,359,120]]},
  {name: "Star Mandala", params: [["Size",200,1000,480],["Star points",3,16,7],
    ["Colour (0 = white, else hue)",0,359,0],["Triangle size (% of radius)",2,20,6]]},
+ {name: "Field 1: Dipole", params: [["Size",200,1000,420],["Lines per charge",4,48,16],["Colour (0 = cream, else hue)",0,359,0]]},
+ {name: "Field 2: Four loops", params: [["Size",200,1000,420],["Lines per charge",4,48,12],["Colour (0 = cream, else hue)",0,359,0]]},
+ {name: "Field 3: Two dipoles", params: [["Size",200,1000,420],["Lines per charge",4,48,10],["Colour (0 = cream, else hue)",0,359,0]]},
+ {name: "Field 4: Grid globe", params: [["Size",200,1000,420],["Lines per charge",4,48,16],["Colour (0 = cream, else hue)",0,359,0]]},
+ {name: "Field 5: Fan", params: [["Size",200,1000,420],["Lines per charge",4,48,10],["Colour (0 = cream, else hue)",0,359,0]]},
 ];
 
 // ---- event log, kept in localStorage so it survives a crash ----
@@ -68,7 +73,8 @@ if (crashedBefore) {
 }
 
 // ---- settings (user values per visualization) ----
-let settings = JSON.parse(store.getItem("sv.settings") || "null") || VIZ.map(v => v.params.map(p => p[3]));
+const saved = JSON.parse(store.getItem("sv.settings") || "[]");
+let settings = VIZ.map((v, i) => saved[i] && saved[i].length === v.params.length ? saved[i] : v.params.map(p => p[3]));
 VIZ.forEach((v, i) => {
   menu.add(new Option(v.name, i));
   const f = document.createElement("fieldset");

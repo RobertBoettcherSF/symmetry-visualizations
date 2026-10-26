@@ -1,6 +1,7 @@
 with SV.Rule_30;
 with SV.Life;
 with SV.Mandala;
+with SV.Fields;
 
 package body SV.API is
 
@@ -23,6 +24,7 @@ package body SV.API is
          when 0      => Rule_30.Start;
          when 1      => Life.Start;
          when 2      => Mandala.Start;
+         when 3 .. 7 => Fields.Start (Viz - 2);
          when others => null;
       end case;
    end Start;
@@ -33,6 +35,7 @@ package body SV.API is
          when 0      => Rule_30.Tick;
          when 1      => Life.Tick;
          when 2      => Mandala.Tick;
+         when 3 .. 7 => Fields.Tick;
          when others => null;
       end case;
    end Tick;
