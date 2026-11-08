@@ -11,8 +11,13 @@ about 3 KB each** (about 26 KB of WebAssembly plus a thin JavaScript layer).
 
 ## View it
 
-Open `dist/index.html` in any modern browser (download it and double-click). No server, no install.
-Or view it online: https://robertboettchersf.github.io/symmetry-visualizations/dist/
+The demo starts by itself and cycles through all 16 visualizations. One self-contained file, no server, no install. JavaScript only draws the pixels the Ada module writes.
+
+* Front page: https://robertboettchersf.github.io/symmetry-visualizations/
+* Same file, direct link: https://robertboettchersf.github.io/symmetry-visualizations/dist/
+* Offline: open `dist/index.html`. `index.html` only forwards there (one link, "Try the visualizations", if the forward does not run).
+
+GitHub Pages already publishes the `main` branch from the repository root. This repo does not change that setting. `.nojekyll` tells that publish to serve the files as they are, instead of building this README into the front page with Jekyll. `index.html` then opens `dist/index.html`, which is where the WebAssembly stays.
 
 ## Controls
 
@@ -74,6 +79,12 @@ gprbuild -P tests/smoke.gpr && ./obj/native/smoke && ./obj/native/balance_stress
 
 Browser check (Node with `playwright-core` and Chrome): `node tests/browser/browser-check.js`
 
+Pages check, no Ada toolchain. It instantiates the WebAssembly already inside `dist/index.html`, runs Rule 30 and Game of Life, then opens the site root in Chrome (menu and Space):
+
+```sh
+node tests/browser/pages-root-smoke.js
+```
+
 ## Layout
 
 ```
@@ -94,33 +105,16 @@ web/template.html         thin JavaScript: drawing, menu, settings, F9, crash lo
 build.sh                  compiles Ada -> WebAssembly, embeds it into dist/index.html
 tools/get-toolchain.sh    downloads the Ada -> WebAssembly compiler into ./toolchain
 tests/smoke.adb, .gpr     tiny native check (normal GNAT); balance_stress.adb checks Balance never stalls
-tests/browser/            headless browser checks (browser-check.js runs all 16 and takes the screenshots)
-dist/index.html           the result
+tests/browser/            headless browser checks (browser-check.js runs all 16 and takes the screenshots;
+                          pages-root-smoke.js checks the embedded module and the Pages front door)
+dist/index.html           the built page: Ada WebAssembly embedded, JavaScript draws
+index.html                Pages front door: forwards to dist/index.html
+.nojekyll                 static GitHub Pages publish (do not render this README as the site)
 ```
 
 Each visualization is an Ada package with `Start` and `Tick`. It reads `Params` and writes pixels into `Frame`.
 To add one, write `src/sv-<name>.ads/.adb`, add a `case` branch in `src/sv-api.adb`, and add one line
 (name, parameter names, min/max/default) to the `VIZ` table in `web/template.html`.
-
-## Rebuild (Linux Mint 21.3 / Ubuntu 22.04)
-
-You need this only if you change the Ada code. You also need [Alire](https://alire.ada.dev) (`alr`).
-
-```sh
-sudo apt install rpm2cpio cpio lld libedit2   # once
-./tools/get-toolchain.sh                      # once: AdaWebPack 24 (GNAT-LLVM) + LLVM 16 libs, ~150 MB in ./toolchain
-./build.sh                                    # -> dist/index.html
-```
-
-`get-toolchain.sh` fetches the AdaWebPack 24.0.0 compiler package (Fedora 40 RPM) and the LLVM 16 libraries it needs.
-It also uses Alire to fetch the GNAT 14 runtime library that the compiler itself requires.
-Nothing is installed system-wide.
-
-Native check with your normal GNAT (zero warnings with `-gnatwa -gnatwe`):
-
-```sh
-gprbuild -P tests/smoke.gpr && ./obj/native/smoke
-```
 
 ## License
 
